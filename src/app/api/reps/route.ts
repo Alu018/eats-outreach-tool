@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { Rep } from '../../../types'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   console.log('=== API Route Called ===')
   console.log('GOOGLE_API_KEY exists:', !!process.env.GOOGLE_API_KEY)
   console.log('GOOGLE_API_KEY first 10 chars:', process.env.GOOGLE_API_KEY?.substring(0, 10))

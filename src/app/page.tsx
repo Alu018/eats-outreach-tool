@@ -228,7 +228,7 @@ ${fullLetterText}`
             EATS Act Outreach Tool - Democratic Representatives
           </h1>
           <p className="text-slate-600 text-lg">
-            Use the filter below to select your state and find your representatives. Then select your representative's name to begin personalizing your outreach email.
+            Use the filter below to select your state and find your representatives. Then select your representative&apos;s name to begin personalizing your outreach email.
           </p>
         </div>
 

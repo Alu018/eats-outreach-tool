@@ -1,17 +1,13 @@
 import React from 'react'
+import { Rep } from '../types'
 
 interface Props {
   states: string[]
   onSelect: (state: string) => void
-  allReps?: any[]  // Add this to count reps per state
+  allReps?: Rep[]
 }
 
-const StateFilter: React.FC<Props> = ({ states, onSelect, allReps = [] }) => {
-  // Count reps per state
-  const getRepCount = (state: string) => {
-    return allReps.filter(rep => rep.stateDistrict.startsWith(state)).length
-  }
-
+const StateFilter: React.FC<Props> = ({ states, onSelect }) => {
   return (
     <div className="mb-6">
       <label htmlFor="state-filter" className="block mb-3 text-lg font-semibold text-slate-700">
