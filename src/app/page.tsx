@@ -13,6 +13,12 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [personalizedEmail, setPersonalizedEmail] = useState('')
+  const [isPersonalizing, setIsPersonalizing] = useState(false)
+  const [usePersonalized, setUsePersonalized] = useState(false)
+
+  const [editableEmail, setEditableEmail] = useState('')
+
   // ...existing constants (quillLink, fullLetterText)...
   const quillLink = `https://quill.senate.gov/letters/letter/28457/opt-in/view/aaaaac2a-acbd-4efa-885f-22cd234cbd8a/`
 
@@ -135,9 +141,48 @@ ${orgName || '[Your Name]'}
 ${fullLetterText}`
   }
 
+  const personalizeEmail = async (rep: Rep) => {
+    setIsPersonalizing(true)
+    try {
+      const originalEmail = generateEmailBody(rep)
+      const response = await fetch('/api/personalize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          originalEmail,
+          repName: rep.name,
+          repInfo: {
+            stateDistrict: rep.stateDistrict,
+            signedCurrent: rep.signedCurrent,
+            signed118th: rep.signed118th,
+            signed117th: rep.signed117th,
+            signed115th: rep.signed115th,
+            senatorsSignedSenateVersion: rep.senatorsSignedSenateVersion
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to personalize email')
+      }
+
+      const data = await response.json()
+      setPersonalizedEmail(data.personalizedEmail)
+      setEditableEmail(data.personalizedEmail) // Update editable version
+      setUsePersonalized(true)
+    } catch (error) {
+      console.error('Error personalizing email:', error)
+      alert('Failed to personalize email. Please try again.')
+    } finally {
+      setIsPersonalizing(false)
+    }
+  }
+
   const handleEmail = (rep: Rep) => {
     const subject = `Request to Sign Letter Opposing EATS Act Provisions`
-    const emailBody = generateEmailBody(rep)
+    const emailBody = editableEmail || generateEmailBody(rep) // Use editable version
 
     try {
       // Clean the email body to remove any problematic characters
@@ -166,15 +211,24 @@ ${fullLetterText}`
     }
   }
 
+  // Add a function to reset personalization when modal opens (around line 190)
+  const handleRepClick = (rep: Rep) => {
+    setSelectedRep(rep)
+    setPersonalizedEmail('')
+    setUsePersonalized(false)
+    setIsPersonalizing(false)
+    setEditableEmail(generateEmailBody(rep)) // Initialize with standard email
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
         <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-8 mb-8">
           <h1 className="text-4xl font-bold text-slate-800 mb-3">
-            EATS Act Outreach Tool
+            EATS Act Outreach Tool - Democratic Representatives
           </h1>
           <p className="text-slate-600 text-lg">
-            Connect with House representatives about the EATS Act legislation
+            Use the filter below to select your state and find your representatives. Then select your representative's name to begin personalizing your outreach email.
           </p>
         </div>
 
@@ -182,7 +236,7 @@ ${fullLetterText}`
           {isLoading ? (
             // Loading State
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mb-4"></div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Loading Representatives...</h3>
               <p className="text-slate-600 text-center max-w-md">
                 Fetching the latest data from Google Sheets. This may take a moment.
@@ -196,7 +250,7 @@ ${fullLetterText}`
               <p className="text-slate-600 text-center max-w-md mb-4">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Try Again
               </button>
@@ -212,7 +266,7 @@ ${fullLetterText}`
               <RepList
                 reps={filteredReps}
                 allReps={reps}
-                onRepClick={setSelectedRep}
+                onRepClick={handleRepClick}
               />
 
               {/* Show current filter info */}
@@ -233,7 +287,7 @@ ${fullLetterText}`
           <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+              <div className="bg-gradient-to-r from-blue-400 to-blue-700 text-white p-6">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold">{selectedRep.name}</h2>
@@ -250,54 +304,52 @@ ${fullLetterText}`
 
               {/* Modal Content */}
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Representative Info */}
-                  <div>
+                <div className="grid lg:grid-cols-3 gap-6">
+                  {/* Representative Info - Smaller column */}
+                  <div className="lg:col-span-1">
                     <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                      <span className="text-blue-600">ℹ️</span>
                       Representative Information
                     </h3>
 
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-3 mb-4">
                       <div>
-                        <span className="text-sm font-medium text-slate-500">Office Phone:</span>
-                        <p className="text-slate-700">{selectedRep.officePhone || 'Not available'}</p>
+                        <span className="text-xs font-medium text-slate-500">Office Phone:</span>
+                        <p className="text-sm text-slate-700">{selectedRep.officePhone || 'Not available'}</p>
                       </div>
                       <div>
-                        <span className="text-sm font-medium text-slate-500">Legislative Contacts:</span>
-                        <p className="text-slate-700">{selectedRep.legislativeContacts || 'Not available'}</p>
+                        <span className="text-xs font-medium text-slate-500">Legislative Contacts:</span>
+                        <p className="text-sm text-slate-700">{selectedRep.legislativeContacts || 'Not available'}</p>
                       </div>
                     </div>
 
                     <h4 className="text-md font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                      <span className="text-blue-600">📝</span>
                       Signing History
                     </h4>
 
-                    <div className="space-y-2 mb-6">
-                      <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
-                        <span className="text-slate-700">Current Letter:</span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedRep.signedCurrent
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center justify-between py-1 px-2 rounded bg-slate-50">
+                        <span className="text-xs text-slate-700">Current Letter:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedRep.signedCurrent
                           ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-rose-100 text-rose-700'
                           }`}>
                           {selectedRep.signedCurrent ? '✓ Signed' : '○ Not Signed'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
-                        <span className="text-slate-700">118th Congress:</span>
+                      <div className="flex items-center justify-between py-1 px-2 rounded bg-slate-50">
+                        <span className="text-xs text-slate-700">118th Congress:</span>
                         <span className={selectedRep.signed118th ? 'text-emerald-600' : 'text-slate-400'}>
                           {selectedRep.signed118th ? '✓' : '○'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
-                        <span className="text-slate-700">117th Congress:</span>
+                      <div className="flex items-center justify-between py-1 px-2 rounded bg-slate-50">
+                        <span className="text-xs text-slate-700">117th Congress:</span>
                         <span className={selectedRep.signed117th ? 'text-emerald-600' : 'text-slate-400'}>
                           {selectedRep.signed117th ? '✓' : '○'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
-                        <span className="text-slate-700">115th Congress:</span>
+                      <div className="flex items-center justify-between py-1 px-2 rounded bg-slate-50">
+                        <span className="text-xs text-slate-700">115th Congress:</span>
                         <span className={selectedRep.signed115th ? 'text-emerald-600' : 'text-slate-400'}>
                           {selectedRep.signed115th ? '✓' : '○'}
                         </span>
@@ -305,24 +357,23 @@ ${fullLetterText}`
                     </div>
 
                     {selectedRep.senatorsSignedSenateVersion && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <span className="text-sm font-medium text-blue-700">Senate Support:</span>
-                        <p className="text-blue-600 text-sm mt-1">{selectedRep.senatorsSignedSenateVersion}</p>
+                      <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+                        <span className="text-xs font-medium text-blue-700">Senate Support:</span>
+                        <p className="text-blue-400 text-xs mt-1">{selectedRep.senatorsSignedSenateVersion}</p>
                       </div>
                     )}
                   </div>
 
-                  {/* Email Section */}
-                  <div>
+                  {/* Email Section - Larger column */}
+                  <div className="lg:col-span-2">
                     <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                      <span className="text-blue-600">✉️</span>
                       Outreach Email
                     </h3>
 
                     <div className="mb-4">
-                      <label htmlFor="orgName" className="block mb-2 text-sm font-medium text-slate-700">
+                      <div className="block mb-2 text-sm font-medium text-slate-700">
                         Your Organization Name:
-                      </label>
+                      </div>
                       <input
                         id="orgName"
                         type="text"
@@ -333,20 +384,63 @@ ${fullLetterText}`
                       />
                     </div>
 
-                    <div className="bg-slate-50 border-2 border-slate-200 rounded-lg p-4 mb-6 max-h-80 overflow-y-auto">
-                      <h4 className="text-sm font-medium text-slate-600 mb-2">Email Preview:</h4>
-                      <pre className="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed">
-                        {generateEmailBody(selectedRep)}
-                      </pre>
+                    <div className="bg-slate-50 border-2 border-slate-200 rounded-lg p-4 mb-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-medium text-slate-600">
+                          Email Content {usePersonalized && personalizedEmail ? '(AI Personalized)' : '(Standard)'}:
+                        </h4>
+                        <div className="flex gap-2">
+                          {usePersonalized && personalizedEmail && (
+                            <button
+                              onClick={() => {
+                                setUsePersonalized(false)
+                                setPersonalizedEmail('')
+                                setEditableEmail(generateEmailBody(selectedRep))
+                              }}
+                              className="text-xs text-blue-400 hover:text-blue-800 underline"
+                            >
+                              Reset to Standard
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <textarea
+                        value={editableEmail}
+                        onChange={(e) => setEditableEmail(e.target.value)}
+                        className="w-full h-80 p-3 border border-slate-300 rounded-lg resize-none focus:outline-none focus:border-blue-400 text-sm text-slate-700 leading-relaxed font-mono"
+                        placeholder="Email content will appear here..."
+                      />
+                      <p className="text-xs text-slate-500 mt-2">
+                        You can edit the email content directly above. Changes will be reflected when you send the email.
+                      </p>
                     </div>
 
-                    <button
-                      onClick={() => handleEmail(selectedRep)}
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <span className="text-xl">📧</span>
-                      Send Email to {selectedRep.name}
-                    </button>
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => personalizeEmail(selectedRep)}
+                        disabled={isPersonalizing}
+                        className="w-full bg-gradient-to-r bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {isPersonalizing ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Personalizing with AI...
+                          </>
+                        ) : (
+                          <>
+                            Personalize with AI
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => handleEmail(selectedRep)}
+                        className="w-full bg-gradient-to-r from-blue-400 to-blue-700 text-white px-6 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span className="text-xl">📧</span>
+                        Send Email to {selectedRep.name}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
