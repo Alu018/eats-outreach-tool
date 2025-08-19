@@ -14,17 +14,17 @@ export async function POST(request: NextRequest) {
 
         const prompt = `Please personalize this outreach email for Representative ${repName}. Keep the core message and structure the same, but make it more engaging and specific to this representative. Here's the representative's information: ${JSON.stringify(repInfo)}
 
-Original email:
-${originalEmail}
+        Original email:
+        ${originalEmail}
 
-Please provide a personalized version that:
-1. Maintains all the key information (Quill link, contacts, etc.)
-2. Adds a more personal touch in the opening
-3. References their past signing history if relevant
-4. Keeps the same professional tone
-5. Maintains the same email structure and closing
+        Please provide a personalized version that:
+        1. Maintains all the key information (Quill link, contacts, etc.)
+        2. Adds a more personal touch in the opening
+        3. References their past signing history if relevant
+        4. Keeps the same professional tone
+        5. Maintains the same email structure and closing
 
-Return only the personalized email text, no additional commentary.`
+        Return only the personalized email text, no additional commentary.`
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
