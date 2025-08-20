@@ -13,14 +13,47 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // EMAIL
   const [personalizedEmail, setPersonalizedEmail] = useState('')
   const [isPersonalizing, setIsPersonalizing] = useState(false)
   const [usePersonalized, setUsePersonalized] = useState(false)
-
   const [editableEmail, setEditableEmail] = useState('')
+  const [hasManualEdit, setHasManualEdit] = useState(false)
+
+  useEffect(() => {
+    if (selectedRep) {
+      document.body.classList.add('overflow-hidden')
+    } else {
+      document.body.classList.remove('overflow-hidden')
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden')
+    }
+  }, [selectedRep])
+
+  useEffect(() => {
+    if (selectedRep) {
+      const generated = generateEmailBody(selectedRep)
+      if (!hasManualEdit || editableEmail === '' || editableEmail === generated) {
+        setEditableEmail(generated)
+        setHasManualEdit(false)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgName, selectedRep])
+
+  // When user types in textarea, mark as manual edit
+  const handleEmailChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditableEmail(e.target.value)
+    setHasManualEdit(true)
+  }
 
   // ...existing constants (quillLink, fullLetterText)...
-  const quillLink = `https://quill.senate.gov/letters/letter/28457/opt-in/view/aaaaac2a-acbd-4efa-885f-22cd234cbd8a/`
+  const quillLink = `https://quill.senate.gov/letters/letter/28457/opt-in/view/aaaaac2a-acbd-4efa-885f-22cd234cbd8a/`;
+  const letter115 = `https://www.foodsolutionsaction.org/may2018115th`;
+  const letter117 = `https://schrier.house.gov/sites/evo-subsites/schrier.house.gov/files/evo-media-document/Prop%2012%20Letter%20FINAL.pdf?utm_source=chatgpt.com`;
+  const letter118 = `https://animalwellnessaction.org/wp-content/uploads/2023/08/Anti-EATS-Act-House-letter-171-signers.pdf`;
+  const senateLetter = `https://www.padilla.senate.gov/newsroom/press-releases/padilla-schiff-booker-markey-lead-28-senate-colleagues-in-effort-to-protect-californias-proposition-12/`;
 
   const fullLetterText = `Letter Text
 
@@ -117,17 +150,45 @@ const Home: React.FC = () => {
   }
 
   const generateEmailBody = (rep: Rep) => {
+    // Build previous letter info
+    const signedLetters: { year: string, url: string }[] = []
+    if (rep.signed115th) signedLetters.push({ year: '115th', url: letter115 })
+    if (rep.signed117th) signedLetters.push({ year: '117th', url: letter117 })
+    if (rep.signed118th) signedLetters.push({ year: '118th', url: letter118 })
+
+    let signingSentence = ''
+    if (signedLetters.length > 0) {
+      const countWord = ['one', 'two', 'three'][signedLetters.length - 1] || signedLetters.length
+      const letterList = signedLetters
+        .map((l) => `${l.year}`)
+        .join(', ')
+        .replace(/, ([^,]*)$/, ', and $1')
+      signingSentence = `Rep. ${rep.name} has been a strong voice on this issue, having signed ${countWord} previous letter${signedLetters.length > 1 ? 's' : ''} in the ${letterList} Congress${signedLetters.length > 1 ? 'es' : ''}. The most recent one was signed by over 170 House Democrats.`
+    } else {
+      signingSentence = 'In 2023, over 170 House Democrats signed a similar opposition letter.'
+    }
+
+    // Senator sentence
+    let senatorSentence = ''
+    if (rep.senatorsSignedSenateVersion) {
+      senatorSentence = `Earlier this year, Senator ${rep.senatorsSignedSenateVersion} also joined a Senate letter expressing the same position.`
+    }
+
+    // Conditionally add previous letter URLs after Quill link
+    let previousLetterLinks = ''
+    if (rep.signed115th) previousLetterLinks += `\nHere is the 115th letter: ${letter115}`
+    if (rep.signed117th) previousLetterLinks += `\nHere is the 117th letter: ${letter117}`
+    if (rep.signed118th) previousLetterLinks += `\nHere is the 118th letter: ${letter118}`
+
     return `Hi ${getFirstNamesFromEmails(rep.legislativeContacts) || rep.name},
 
 Thank you for your consistent support of efforts to promote a safe and sustainable food system.
- 
-I'm reaching out to see if Rep. ${rep.name} would consider signing onto the letter below, which is being led by Reps. Simon, Costa, and McGovern. The letter urges the House Agriculture Committee to reject any provision that would override state-level standards for certain agricultural products. In 2023, over 170 House Democrats signed a similar opposition letter. 
- 
-Earlier this year, Senator Gillibrand also joined a Senate letter expressing the same position.
- 
+
+I'm reaching out to see if Rep. ${rep.name} would consider signing onto the letter below, which is being led by Reps. Simon, Costa, and McGovern. The letter urges the House Agriculture Committee to reject any provision that would override state-level standards for certain agricultural products. ${signingSentence}
+${senatorSentence ? `\n${senatorSentence}\n` : ''}
 These letters oppose what was once known as the "Steve King Amendment," later rebranded as the "EATS Act," though the intent remains the same—stripping states of their right to protect animals, farmers, and consumers.
- 
-Here is the Quill link: ${quillLink}
+
+Here is the Quill link: ${quillLink}${previousLetterLinks}
 
 For any questions or to add your boss's name, you can reach out to Sydney Dahiyat in Rep. Simon's office (Sydney.Dahiyat@mail.house.gov) or John Swords in Rep. McGovern's office (John.Swords@mail.house.gov).
 
@@ -145,13 +206,20 @@ ${fullLetterText}`
     setIsPersonalizing(true)
     try {
       const originalEmail = generateEmailBody(rep)
+      const letterIndex = originalEmail.indexOf(fullLetterText)
+      let mainBody = originalEmail
+
+      if (letterIndex !== -1) {
+        mainBody = originalEmail.slice(0, letterIndex).trim()
+      }
+
       const response = await fetch('/api/personalize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          originalEmail,
+          originalEmail: mainBody, // Only send the main body
           repName: rep.name,
           repInfo: {
             stateDistrict: rep.stateDistrict,
@@ -169,8 +237,10 @@ ${fullLetterText}`
       }
 
       const data = await response.json()
-      setPersonalizedEmail(data.personalizedEmail)
-      setEditableEmail(data.personalizedEmail) // Update editable version
+      // Always append the original fullLetterText after the AI-personalized main body
+      const personalizedWithLetter = `${data.personalizedEmail}\n\n${fullLetterText}`
+      setPersonalizedEmail(personalizedWithLetter)
+      setEditableEmail(personalizedWithLetter) // Update editable version
       setUsePersonalized(true)
     } catch (error) {
       console.error('Error personalizing email:', error)
@@ -236,33 +306,35 @@ ${fullLetterText}`
           {isLoading ? (
             // Loading State
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mb-4"></div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">Loading Representatives...</h3>
-              <p className="text-slate-600 text-center max-w-md">
-                Fetching the latest data from Google Sheets. This may take a moment.
-              </p>
+              {/* ...loading UI... */}
             </div>
           ) : error ? (
             // Error State
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="text-red-500 text-5xl mb-4">⚠️</div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">Failed to Load Data</h3>
-              <p className="text-slate-600 text-center max-w-md mb-4">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
+              {/* ...error UI... */}
             </div>
           ) : (
             // Loaded State
             <>
-              <StateFilter
-                states={states}
-                onSelect={setStateFilter}
-                allReps={reps}
-              />
+              <div className="flex items-center justify-between mb-4">
+                <StateFilter
+                  states={states}
+                  onSelect={setStateFilter}
+                  allReps={reps}
+                />
+                <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200 flex items-center gap-2">
+                  <span className="text-yellow-800 text-sm font-medium">See something wrong? Provide feedback</span>
+                  <a
+                    href="https://mail.google.com/mail/?view=cm&fs=1&to=Allenlu0007@gmail.com&su=EATS%20Outreach%20Tool%20Feedback"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 underline text-sm font-semibold"
+                  >
+                    here
+                  </a>
+                  .
+                </div>
+              </div>
               <RepList
                 reps={filteredReps}
                 allReps={reps}
@@ -284,10 +356,10 @@ ${fullLetterText}`
         {/* Email Modal */}
         {selectedRep && (
           // Line 232 - try removing the backdrop entirely or using rgba
-          <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }} onClick={() => setSelectedRep(null)}>
+            <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-400 to-blue-700 text-white p-6">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-400 text-white p-6">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold">{selectedRep.name}</h2>
@@ -311,21 +383,10 @@ ${fullLetterText}`
                       Representative Information
                     </h3>
 
-                    <div className="space-y-3 mb-4">
-                      <div>
-                        <span className="text-xs font-medium text-slate-500">Office Phone:</span>
-                        <p className="text-sm text-slate-700">{selectedRep.officePhone || 'Not available'}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs font-medium text-slate-500">Legislative Contacts:</span>
-                        <p className="text-sm text-slate-700">{selectedRep.legislativeContacts || 'Not available'}</p>
-                      </div>
-                    </div>
-
+                    {/* SIGNING HISTORY */}
                     <h4 className="text-md font-semibold text-slate-800 mb-3 flex items-center gap-2">
                       Signing History
                     </h4>
-
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center justify-between py-1 px-2 rounded bg-slate-50">
                         <span className="text-xs text-slate-700">Current Letter:</span>
@@ -356,89 +417,92 @@ ${fullLetterText}`
                       </div>
                     </div>
 
-                    {selectedRep.senatorsSignedSenateVersion && (
-                      <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
-                        <span className="text-xs font-medium text-blue-700">Senate Support:</span>
-                        <p className="text-blue-400 text-xs mt-1">{selectedRep.senatorsSignedSenateVersion}</p>
+                    {/* CONTACT */}
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <span className="text-sm font-bold text-slate-700">Legislative Contacts:</span>
+                        <p className="text-sm text-slate-700">{selectedRep.legislativeContacts || 'Not available'}</p>
                       </div>
-                    )}
+                      <div>
+                        <span className="text-sm font-bold text-slate-700">Legislative Director:</span>
+                        <p className="text-sm text-slate-700">{selectedRep.legislativeDirector || 'Not available'}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-slate-700">Senator who signed 2025 Senate letter:</span>
+                        <p className="text-sm text-slate-500">{selectedRep.senatorsSignedSenateVersion || 'None listed'}</p>
+                      </div>
+
+                      <div className="mt-8">
+                        <span className="text-sm text-slate-500">Office Phone:</span>
+                        <p className="text-sm text-slate-700">{selectedRep.officePhone || 'Not available'}</p>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Email Section - Larger column */}
+                  {/* Email Section */}
                   <div className="lg:col-span-2">
                     <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                       Outreach Email
                     </h3>
 
-                    <div className="mb-4">
-                      <div className="block mb-2 text-sm font-medium text-slate-700">
-                        Your Organization Name:
+                    {/* Organization name input */}
+                    <div className="flex items-end justify-between gap-4 mb-4">
+                      <div className="w-64">
+                        <label htmlFor="orgName" className="block mb-2 text-sm font-medium text-slate-700">
+                          Your Organization Name:
+                        </label>
+                        <input
+                          id="orgName"
+                          type="text"
+                          placeholder="Enter your organization name"
+                          value={orgName}
+                          onChange={e => setOrgName(e.target.value)}
+                          className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400"
+                        />
                       </div>
-                      <input
-                        id="orgName"
-                        type="text"
-                        placeholder="Enter your organization name"
-                        value={orgName}
-                        onChange={e => setOrgName(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400"
-                      />
-                    </div>
-
-                    <div className="bg-slate-50 border-2 border-slate-200 rounded-lg p-4 mb-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <h4 className="text-sm font-medium text-slate-600">
-                          Email Content {usePersonalized && personalizedEmail ? '(AI Personalized)' : '(Standard)'}:
-                        </h4>
-                        <div className="flex gap-2">
-                          {usePersonalized && personalizedEmail && (
-                            <button
-                              onClick={() => {
-                                setUsePersonalized(false)
-                                setPersonalizedEmail('')
-                                setEditableEmail(generateEmailBody(selectedRep))
-                              }}
-                              className="text-xs text-blue-400 hover:text-blue-800 underline"
-                            >
-                              Reset to Standard
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <textarea
-                        value={editableEmail}
-                        onChange={(e) => setEditableEmail(e.target.value)}
-                        className="w-full h-80 p-3 border border-slate-300 rounded-lg resize-none focus:outline-none focus:border-blue-400 text-sm text-slate-700 leading-relaxed font-mono"
-                        placeholder="Email content will appear here..."
-                      />
-                      <p className="text-xs text-slate-500 mt-2">
-                        You can edit the email content directly above. Changes will be reflected when you send the email.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
                       <button
                         onClick={() => personalizeEmail(selectedRep)}
                         disabled={isPersonalizing}
-                        className="w-full bg-gradient-to-r bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="bg-purple-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        style={{ whiteSpace: 'nowrap' }}
                       >
                         {isPersonalizing ? (
                           <>
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Personalizing with AI...
+                            Personalizing...
                           </>
                         ) : (
                           <>
-                            Personalize with AI
+                            Personalize Email with A.I.
                           </>
                         )}
                       </button>
+                    </div>
 
+                    {/* Move textarea to the top */}
+                    <div className="mb-2">
+                      <p className="text-xs text-slate-500 mb-2">
+                        You can directly edit the email content below. Changes will be reflected when you send the email.
+                      </p>
+
+                      <textarea
+                        value={editableEmail}
+                        onChange={handleEmailChange}
+                        className="w-full h-80 p-4 bg-gray-50 border border-slate-300 rounded-lg resize-none focus:outline-none focus:border-blue-400 text-sm text-slate-700 leading-relaxed font-mono"
+                        placeholder="Email content will appear here..."
+                      />
+                    </div>
+
+                    {/* Buttons directly below textarea */}
+                    <div className="mb-6">
+                      <p className="text-sm text-slate-700 font-semibold mb-2">
+                        This will automatically open to Gmail and paste in the email content above!
+                      </p>
                       <button
                         onClick={() => handleEmail(selectedRep)}
-                        className="w-full bg-gradient-to-r from-blue-400 to-blue-700 text-white px-6 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 bg-green-700 text-white px-16 py-2 rounded-lg text-base font-semibold hover:bg-green-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <span className="text-xl">📧</span>
-                        Send Email to {selectedRep.name}
+                        Send Email
                       </button>
                     </div>
                   </div>

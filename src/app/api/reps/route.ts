@@ -7,11 +7,11 @@ export async function GET() {
   console.log('GOOGLE_API_KEY exists:', !!process.env.GOOGLE_API_KEY)
   console.log('GOOGLE_API_KEY first 10 chars:', process.env.GOOGLE_API_KEY?.substring(0, 10))
   console.log('SHEET_ID:', process.env.SHEET_ID)
-  
+
   try {
     const sheets = google.sheets({ version: 'v4', auth: process.env.GOOGLE_API_KEY })
     console.log('Google Sheets client created successfully')
-    
+
     console.log('Attempting to fetch from sheet...')
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.SHEET_ID,
@@ -34,7 +34,6 @@ export async function GET() {
     console.log('Second row (first data):', rows[1])
 
     const reps: Rep[] = rows.slice(1).map((r, index) => {
-      console.log(`Processing row ${index + 1}:`, r)
       return {
         name: r[0] || '',
         stateDistrict: r[1] || '',
@@ -43,14 +42,15 @@ export async function GET() {
         signed117th: r[4]?.toLowerCase() === 'y',
         signed115th: r[5]?.toLowerCase() === 'y',
         legislativeContacts: r[6] || '',
-        officePhone: r[7] || '',
-        senatorsSignedSenateVersion: r[8] || '',
+        legislativeDirector: r[7] || '',
+        officePhone: r[8] || '',
+        senatorsSignedSenateVersion: r[9] || '',
       }
     })
 
     console.log('Processed reps count:', reps.length)
     console.log('First rep:', reps[0])
-    
+
     return NextResponse.json(reps)
   } catch (err) {
     console.error('=== ERROR ===')
@@ -58,15 +58,15 @@ export async function GET() {
       console.error('Error type:', (err as { constructor?: { name?: string } }).constructor?.name)
       console.error('Error message:', (err as { message?: string }).message)
       console.error('Full error:', err)
-      return NextResponse.json({ 
-        error: (err as { message?: string }).message, 
+      return NextResponse.json({
+        error: (err as { message?: string }).message,
         type: (err as { constructor?: { name?: string } }).constructor?.name,
         details: err.toString()
       }, { status: 500 })
     } else {
       console.error('Unknown error:', err)
-      return NextResponse.json({ 
-        error: 'Unknown error', 
+      return NextResponse.json({
+        error: 'Unknown error',
         type: typeof err,
         details: String(err)
       }, { status: 500 })

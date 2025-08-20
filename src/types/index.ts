@@ -6,6 +6,7 @@ export interface Rep {
   signed117th: boolean
   signed115th: boolean
   legislativeContacts: string
+  legislativeDirector: string
   officePhone: string
   senatorsSignedSenateVersion: string
 }
