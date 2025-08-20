@@ -317,9 +317,12 @@ ${fullLetterText}`
 
         <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-6">
           {isLoading ? (
-            // Loading State
             <div className="flex flex-col items-center justify-center py-16">
-              {/* ...loading UI... */}
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mb-4"></div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">Loading Representatives...</h3>
+              <p className="text-slate-600 text-center max-w-md">
+                Fetching the latest data from Google Sheets. This may take a moment.
+              </p>
             </div>
           ) : error ? (
             // Error State
