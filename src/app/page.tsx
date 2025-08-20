@@ -170,8 +170,13 @@ const Home: React.FC = () => {
 
     // Senator sentence
     let senatorSentence = ''
-    if (rep.senatorsSignedSenateVersion) {
-      senatorSentence = `Earlier this year, Senator ${rep.senatorsSignedSenateVersion} also joined a Senate letter expressing the same position.`
+    if (
+      rep.senatorsSignedSenateVersion &&
+      rep.senatorsSignedSenateVersion.trim().toLowerCase() !== 'none'
+    ) {
+      // Get only the first senator's last name
+      const firstSenator = rep.senatorsSignedSenateVersion.split(',')[0].trim()
+      senatorSentence = `Earlier this year, Senator ${firstSenator} also joined a Senate letter expressing the same position.`
     }
 
     // Conditionally add previous letter URLs after Quill link
@@ -179,6 +184,14 @@ const Home: React.FC = () => {
     if (rep.signed115th) previousLetterLinks += `\nHere is the 115th letter: ${letter115}`
     if (rep.signed117th) previousLetterLinks += `\nHere is the 117th letter: ${letter117}`
     if (rep.signed118th) previousLetterLinks += `\nHere is the 118th letter: ${letter118}`
+
+    // Conditionally add Senate letter link
+    if (
+      rep.senatorsSignedSenateVersion &&
+      rep.senatorsSignedSenateVersion.trim().toLowerCase() !== 'none'
+    ) {
+      previousLetterLinks += `\nHere is the 2025 Senate letter: ${senateLetter}`
+    }
 
     return `Hi ${getFirstNamesFromEmails(rep.legislativeContacts) || rep.name},
 
