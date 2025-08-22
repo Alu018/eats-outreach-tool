@@ -315,6 +315,12 @@ ${fullLetterText}`
           </p>
         </div>
 
+        <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-8 mb-8">
+          <p className="text-red-600 text-xl font-bold">
+            If you are using the "Personalize with A.I." feature, please remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.
+          </p>
+        </div>
+
         <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-6">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16">
