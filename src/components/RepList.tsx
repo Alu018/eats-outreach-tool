@@ -37,17 +37,31 @@ const RepList: React.FC<Props> = ({ reps, onRepClick }) => {
                                 onClick={() => onRepClick(rep)}
                             >
                                 <td className="px-6 py-4 border-r border-blue-100 last:border-r-0">
-                                    <span className="text-blue-600 hover:text-blue-800 font-medium">
-                                        {rep.name}
-                                    </span>
+                                    <div className="flex items-center justify-between w-full">
+                                        <span className="text-indigo-500 hover:text-indigo-800 font-semibold">
+                                            {rep.name}
+                                        </span>
+
+                                        {/* UI Signifier */}
+                                        <span
+                                            className="text-gray-400 flex items-center gap-1"
+                                            title="View details"
+                                            style={{ pointerEvents: 'none' }} // So the whole row is clickable, not just the icon
+                                        >
+                                            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                <path d="M9 6l6 6-6 6" />
+                                            </svg>
+                                            <span className="text-xs font-medium">View</span>
+                                        </span>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 border-r border-blue-100 last:border-r-0 text-slate-600 font-medium">
                                     {rep.stateDistrict}
                                 </td>
                                 <td className="px-6 py-4 border-r border-blue-100 last:border-r-0">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${rep.signedCurrent
-                                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                            : 'bg-rose-100 text-rose-700 border border-rose-200'
+                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                        : 'bg-rose-100 text-rose-700 border border-rose-200'
                                         }`}>
                                         {rep.signedCurrent ? '✓ Signed' : '○ Not Signed'}
                                     </span>
