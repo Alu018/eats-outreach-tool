@@ -384,13 +384,16 @@ ${fullLetterText}`
                   allReps={reps}
                 />
                 {/* Rep name search bar */}
-                <input
-                  type="text"
-                  value={repSearch}
-                  onChange={e => setRepSearch(e.target.value)}
-                  placeholder="Search by Rep name"
-                  className="px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400 w-64"
-                />
+                <div className="flex items-center gap-4">
+                  <p className="text-slate-700 font-bold">Search by Rep name:</p>
+                  <input
+                    type="text"
+                    value={repSearch}
+                    onChange={e => setRepSearch(e.target.value)}
+                    placeholder="Search by Rep name"
+                    className="px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400 w-64"
+                  />
+                </div>
               </div>
               <RepList
                 reps={filteredReps}
@@ -486,7 +489,7 @@ ${fullLetterText}`
                       </div>
                       <div>
                         <span className="text-sm font-bold text-slate-700">Senator who signed 2025 Senate letter:</span>
-                        <p className="text-sm text-slate-500">{selectedRep.senatorsSignedSenateVersion || 'None listed'}</p>
+                        <p className="text-sm text-slate-700">{selectedRep.senatorsSignedSenateVersion || 'None listed'}</p>
                       </div>
 
                       <div className="mt-8">
