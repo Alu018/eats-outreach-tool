@@ -170,11 +170,13 @@ const Home: React.FC = () => {
 
     // Senator sentence
     let senatorSentence = ''
+    const senatorValue = rep.senatorsSignedSenateVersion?.trim().toLowerCase()
     if (
       rep.senatorsSignedSenateVersion &&
-      rep.senatorsSignedSenateVersion.trim().toLowerCase() !== 'none'
+      senatorValue !== 'none' &&
+      senatorValue !== 'no' &&
+      senatorValue !== 'na'
     ) {
-      // Get only the first senator's last name
       const firstSenator = rep.senatorsSignedSenateVersion.split(',')[0].trim()
       senatorSentence = `Earlier this year, Senator ${firstSenator} also joined a Senate letter expressing the same position.`
     }
@@ -188,7 +190,9 @@ const Home: React.FC = () => {
     // Conditionally add Senate letter link
     if (
       rep.senatorsSignedSenateVersion &&
-      rep.senatorsSignedSenateVersion.trim().toLowerCase() !== 'none'
+      senatorValue !== 'none' &&
+      senatorValue !== 'no' &&
+      senatorValue !== 'na'
     ) {
       previousLetterLinks += `\nHere is the 2025 Senate letter: ${senateLetter}`
     }
@@ -216,6 +220,7 @@ ${fullLetterText}`
   }
 
   const personalizeEmail = async (rep: Rep) => {
+
     setIsPersonalizing(true)
     try {
       const originalEmail = generateEmailBody(rep)
@@ -226,22 +231,33 @@ ${fullLetterText}`
         mainBody = originalEmail.slice(0, letterIndex).trim()
       }
 
+      const getSenatorLastName = (senatorString: string) => {
+        if (!senatorString) return ''
+        const value = senatorString.trim().toLowerCase()
+        if (value === 'none' || value === 'no' || value === 'na') return ''
+        const first = senatorString.split(',')[0].trim()
+        const parts = first.split(' ')
+        return parts[parts.length - 1]
+      }
+
+      const repInfo = {
+        stateDistrict: rep.stateDistrict,
+        signedCurrent: rep.signedCurrent,
+        signed118th: rep.signed118th,
+        signed117th: rep.signed117th,
+        signed115th: rep.signed115th,
+        senatorsSignedSenateVersion: getSenatorLastName(rep.senatorsSignedSenateVersion)
+      }
+
       const response = await fetch('/api/personalize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          originalEmail: mainBody, // Only send the main body
+          originalEmail: mainBody,
           repName: rep.name,
-          repInfo: {
-            stateDistrict: rep.stateDistrict,
-            signedCurrent: rep.signedCurrent,
-            signed118th: rep.signed118th,
-            signed117th: rep.signed117th,
-            signed115th: rep.signed115th,
-            senatorsSignedSenateVersion: rep.senatorsSignedSenateVersion
-          }
+          repInfo
         })
       })
 
@@ -317,7 +333,7 @@ ${fullLetterText}`
 
         <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-8 mb-8">
           <p className="text-red-600 text-xl font-bold">
-            If you are using the "Personalize with A.I." feature, please remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.
+            Always remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.
           </p>
         </div>
 
