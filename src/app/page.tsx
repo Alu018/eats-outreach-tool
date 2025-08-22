@@ -20,6 +20,9 @@ const Home: React.FC = () => {
   const [editableEmail, setEditableEmail] = useState('')
   const [hasManualEdit, setHasManualEdit] = useState(false)
 
+  // search
+  const [repSearch, setRepSearch] = useState('')
+
   useEffect(() => {
     if (selectedRep) {
       document.body.classList.add('overflow-hidden')
@@ -112,15 +115,19 @@ const Home: React.FC = () => {
       })
   }, [])
 
-  // ...existing helper functions...
-  const filteredReps = stateFilter
-    ? reps.filter(r => {
-      // Extract state from the district and compare
-      const stateMatch = r.stateDistrict.match(/^([A-Z]{2})/i)
-      const repState = stateMatch ? stateMatch[1].toUpperCase() : ''
-      return repState === stateFilter
-    })
-    : reps
+  const filteredReps = reps.filter(r => {
+    // State filter
+    const stateMatch = r.stateDistrict.match(/^([A-Z]{2})/i)
+    const repState = stateMatch ? stateMatch[1].toUpperCase() : ''
+    const stateOk = stateFilter ? repState === stateFilter : true
+
+    // Name search (case-insensitive, partial match)
+    const nameOk = repSearch
+      ? r.name.toLowerCase().includes(repSearch.trim().toLowerCase())
+      : true
+
+    return stateOk && nameOk
+  })
 
   // Helper function to extract first names from emails
   const getFirstNamesFromEmails = (emailString: string) => {
@@ -332,9 +339,25 @@ ${fullLetterText}`
             <li>3. Personalize your email with AI and add your organization</li>
             <li>4. Send your email</li>
           </ol>
+
+          {/* Check your work */}
           <p className="text-red-600 text-xl font-bold mt-4">
             Always remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.
           </p>
+
+          {/* Feedback */}
+          <div className="mt-4 p-2 bg-yellow-50 rounded-lg border border-yellow-200 flex items-center gap-1 w-84">
+            <span className="text-yellow-800 text-sm font-medium">See something wrong? Provide feedback</span>
+            <a
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=Allenlu0007@gmail.com&su=EATS%20Outreach%20Tool%20Feedback"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-700 underline text-sm font-semibold"
+            >
+              here
+            </a>
+            .
+          </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-6">
@@ -360,18 +383,14 @@ ${fullLetterText}`
                   onSelect={setStateFilter}
                   allReps={reps}
                 />
-                <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200 flex items-center gap-2">
-                  <span className="text-yellow-800 text-sm font-medium">See something wrong? Provide feedback</span>
-                  <a
-                    href="https://mail.google.com/mail/?view=cm&fs=1&to=Allenlu0007@gmail.com&su=EATS%20Outreach%20Tool%20Feedback"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-700 underline text-sm font-semibold"
-                  >
-                    here
-                  </a>
-                  .
-                </div>
+                {/* Rep name search bar */}
+                <input
+                  type="text"
+                  value={repSearch}
+                  onChange={e => setRepSearch(e.target.value)}
+                  placeholder="Search by Rep name"
+                  className="px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400 w-64"
+                />
               </div>
               <RepList
                 reps={filteredReps}
