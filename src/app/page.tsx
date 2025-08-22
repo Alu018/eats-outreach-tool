@@ -326,13 +326,13 @@ ${fullLetterText}`
           <h1 className="text-4xl font-bold text-slate-800 mb-3">
             EATS Act Outreach Tool - Democratic Representatives
           </h1>
-          <p className="text-slate-600 text-lg">
-            Use the filter below to select your state and find your representatives. Then select your representative&apos;s name to begin personalizing your outreach email.
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-8 mb-8">
-          <p className="text-red-600 text-xl font-bold">
+          <ol className="text-slate-600 text-lg">
+            <li>1. Use the filter below to select your state and find your representatives.</li>
+            <li>2. Select your representative&apos;s name</li>
+            <li>3. Personalize your email with AI and add your organization</li>
+            <li>4. Send your email</li>
+          </ol>
+          <p className="text-red-600 text-xl font-bold mt-4">
             Always remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.
           </p>
         </div>
