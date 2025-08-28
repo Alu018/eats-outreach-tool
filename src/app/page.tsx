@@ -23,6 +23,14 @@ const Home: React.FC = () => {
   // search
   const [repSearch, setRepSearch] = useState('')
 
+  // alert
+  useEffect(() => {
+    if (!localStorage.getItem('eatsOutreachAlertShown')) {
+      alert('Important: Please check the caveats listed below before using this tool!');
+      localStorage.setItem('eatsOutreachAlertShown', 'true');
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedRep) {
       document.body.classList.add('overflow-hidden')
@@ -330,20 +338,23 @@ ${fullLetterText}`
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
         <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-8 mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-3">
-            EATS Act Outreach Tool - Democratic Representatives
+          <h1 className="text-3xl font-bold text-slate-800 mb-3">
+            EATS Act Outreach Tool for Orgs
           </h1>
           <ol className="text-slate-600 text-lg">
-            <li>1. Use the filter below to select your state and find your representatives.</li>
+            <li>1. Use the filter below to select your state and find your representatives (these are only democratic reps).</li>
             <li>2. Select your representative&apos;s name</li>
             <li>3. Personalize your email with AI and add your organization</li>
             <li>4. Send your email</li>
           </ol>
 
           {/* Check your work */}
-          <p className="text-red-600 text-xl font-bold mt-4">
-            Always remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.
-          </p>
+          <div className="text-red-700 text-lg font-bold mt-4">Caveats:
+            <ul className="list-decimal list-inside">
+              <li>Always remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.</li>
+              <li>The emails drafted by this tool are ONLY meant to sent by ORGANIZATIONS, NOT individuals. Every organization should only send one email for each representative.</li>
+            </ul>
+          </div>
 
           {/* Feedback */}
           <div className="mt-4 p-2 bg-yellow-50 rounded-lg border border-yellow-200 flex items-center gap-1 w-84">
