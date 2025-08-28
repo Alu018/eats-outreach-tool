@@ -59,37 +59,13 @@ const Home: React.FC = () => {
     setHasManualEdit(true)
   }
 
-  // ...existing constants (quillLink, fullLetterText)...
-  const quillLink = `https://quill.senate.gov/letters/letter/28457/opt-in/view/aaaaac2a-acbd-4efa-885f-22cd234cbd8a/`;
+  const quillLink = `None`;
   const letter115 = `https://www.foodsolutionsaction.org/may2018115th`;
   const letter117 = `https://schrier.house.gov/sites/evo-subsites/schrier.house.gov/files/evo-media-document/Prop%2012%20Letter%20FINAL.pdf?utm_source=chatgpt.com`;
   const letter118 = `https://animalwellnessaction.org/wp-content/uploads/2023/08/Anti-EATS-Act-House-letter-171-signers.pdf`;
   const senateLetter = `https://www.padilla.senate.gov/newsroom/press-releases/padilla-schiff-booker-markey-lead-28-senate-colleagues-in-effort-to-protect-californias-proposition-12/`;
 
-  const fullLetterText = `Letter Text
-
-        Dear Chairman Thompson and Ranking Member Craig,
-
-        We write today expressing our strong opposition to the inclusion of the Save Our Bacon (SOB) Act (H.R. 4673), which is simply the same language as Sec. 12007 of last year's Farm, Food, and National Security Act of 2024 (H.R.8467); the Food Security and Farm Protection Act (S. 1306); or any similar legislation being considered as part of a "skinny" farm bill or other legislative vehicle. Modeled after former Representative Steve King's amendment, which was intensely controversial and ultimately excluded from the final 2014 and 2018 Farm Bills, the SOB Act and related proposals would harm America's farmers, threaten numerous state laws, and infringe on the fundamental rights of states to establish laws and regulations within their own borders. 
-
-        Demand from consumers, food companies, and the farming community has propelled 15 states to enact public health, food safety, and humane standards for the in-state production and sale of products from egg-laying chickens, veal calves, and mother pigs. Many pork and egg farmers have already invested significantly in transitioning to crate-free and cage-free production. The United Egg Producers, the egg industry's trade association, opposes reversing state cage-free laws, as do many pork producers who have embraced the new market opportunities that these laws have created.
-
-        But the SOB Act and related measures are promoted with the primary goal of undermining these standards – particularly California's Proposition 12, which the U.S. Supreme Court upheld in a 2023 decision. In that decision, the Court affirmed that states have the authority to regulate the sale of products within their borders and noted that, "Companies that choose to sell products in various States must normally comply with the laws of those various States." In June, the Supreme Court declined to hear yet another pork industry challenge to Proposition 12 when it denied certiorari to the Iowa Pork Producers Association. It is worth noting that Proposition 12 and all implementing regulations were in full effect as of January 1, 2024. 
-
-        The SOB Act aims to undermine the basic principles of federalism by preempting hundreds of state and local laws, even where no federal standards exist, creating a regulatory vacuum. In doing so, the SOB Act and similar iterations would drastically broaden the scope of federal preemption and impede the ability of voters and elected officials to enact laws that address local concerns due to the unique nature of individual communities. 
-
-        This is not a case of California and other states imposing their standards on out-of-state producers, as producers in any state can choose not to supply another state's consumers or to segregate animals for different markets. Pork industry economists noted this in an amicus brief, writing, "Only those producers for which compliance with Proposition 12 is economically beneficial will choose to do so, while all others will continue to supply the vast majority of the North American pork market beyond California's border and face little or no economic impact." Additionally, a recent empirical study by three USDA-affiliated economists found no evidence that Proposition 12 impacted pork products outside of California. Using Circana retail scanner data, the study examined early price impacts on covered pork products in both California and the broader U.S. market, concluding there were none. 
-
-        Notably, the importance of trade markets abroad lies in providing key opportunities for pork and other meat producers, particularly those who opt not to sell within the United States. Key export destinations such as China, Mexico, and Canada accounted for a total trade value of $4.852 billion at the end of 2024, according to data from the Meat Institute.
-
-        At the same time, many large pork producers, including Clemens, JBS, Hormel, Perdue, Tyson, and Smithfield, as well as many independent farmers and producers, are following Proposition 12's standards and supplying state markets. A joint amicus brief submitted by independent farming businesses, farm advocacy organizations including the National Sustainable Agriculture Coalition, and state farmers unions for Indiana, Iowa, Pennsylvania, Idaho, Oregon and Washington stated, "Independent farmers are willing to meet this demand, and in doing so, can access some of the wealth and power that has accumulated only for pork integrators, and redistribute it back to local communities, businesses, and families." The SOB Act would undermine this progress and devalue the investments that farmers have already made to comply with Proposition 12 and similar laws. 
-
-        Besides attacking sales laws related to animal welfare, the SOB Act and related measures  could jeopardize how states set standards for disease and quarantine control, toxic materials, and more. 
-
-        We believe that Congress should not usurp the longstanding power of states to regulate food and agricultural products within their borders. We need not agree with every law or rule adopted by each state to adhere to this core principle of federalism. We urge you to reject the inclusion of this provision in any form in any legislative vehicle. Thank you for your consideration.
-
-
-        ###`
+  const fullLetterText = `none`
 
   useEffect(() => {
     setIsLoading(true)
@@ -216,22 +192,20 @@ const Home: React.FC = () => {
 
 Thank you for your consistent support of efforts to promote a safe and sustainable food system.
 
-I'm reaching out to see if Rep. ${rep.name} would consider signing onto the letter below, which is being led by Reps. Simon, Costa, and McGovern. The letter urges the House Agriculture Committee to reject any provision that would override state-level standards for certain agricultural products. ${signingSentence}
+I'm reaching out to see if Rep. ${rep.name} would consider signing onto a letter currently circulating in the House, which is being led by Reps. Simon, Costa, and McGovern. The letter urges the House Agriculture Committee to reject any provision that would override state-level standards for certain agricultural products. ${signingSentence}
 ${senatorSentence ? `\n${senatorSentence}\n` : ''}
 These letters oppose what was once known as the "Steve King Amendment," later rebranded as the "EATS Act," though the intent remains the same—stripping states of their right to protect animals, farmers, and consumers.
-
-Here is the Quill link: ${quillLink}${previousLetterLinks}
-
+${previousLetterLinks ? `${previousLetterLinks}\n` : ''}
 For any questions or to add your boss's name, you can reach out to Sydney Dahiyat in Rep. Simon's office (Sydney.Dahiyat@mail.house.gov) or John Swords in Rep. McGovern's office (John.Swords@mail.house.gov).
 
-Thanks again for your leadership on this issue, and for considering this latest request. The full letter text is below.
+Thanks again for your leadership on this issue, and for considering this latest request.
 
 Best,
 ${orgName || '[Your Name]'}
 
 --
 
-${fullLetterText}`
+`
   }
 
   const personalizeEmail = async (rep: Rep) => {
