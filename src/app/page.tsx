@@ -59,13 +59,13 @@ const Home: React.FC = () => {
     setHasManualEdit(true)
   }
 
-  const quillLink = `None`;
+  const quillLink = ``;
   const letter115 = `https://www.foodsolutionsaction.org/may2018115th`;
   const letter117 = `https://schrier.house.gov/sites/evo-subsites/schrier.house.gov/files/evo-media-document/Prop%2012%20Letter%20FINAL.pdf?utm_source=chatgpt.com`;
   const letter118 = `https://animalwellnessaction.org/wp-content/uploads/2023/08/Anti-EATS-Act-House-letter-171-signers.pdf`;
   const senateLetter = `https://www.padilla.senate.gov/newsroom/press-releases/padilla-schiff-booker-markey-lead-28-senate-colleagues-in-effort-to-protect-californias-proposition-12/`;
 
-  const fullLetterText = `none`
+  const fullLetterText = ``
 
   useEffect(() => {
     setIsLoading(true)
@@ -326,7 +326,7 @@ ${orgName || '[Your Name]'}
           <div className="text-red-700 text-lg font-bold mt-4">Caveats:
             <ul className="list-decimal list-inside">
               <li>Always remember to check for accuracy before sending! Like with any AI, models are not perfect and are prone to making mistakes.</li>
-              <li>The emails drafted by this tool are ONLY meant to sent by ORGANIZATIONS, NOT individuals. Every organization should only send one email for each representative.</li>
+              <li>The emails drafted by this tool are ONLY meant to be sent by ORGANIZATIONS, NOT individuals. Each organization should only send one email to each representative listed below.</li>
             </ul>
           </div>
 
