@@ -505,7 +505,7 @@ ${orgName || '[Your Name]'}
                           className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400"
                         />
                       </div>
-                      <button
+                      {/* <button
                         onClick={() => personalizeEmail(selectedRep)}
                         disabled={isPersonalizing}
                         className="bg-purple-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -521,7 +521,7 @@ ${orgName || '[Your Name]'}
                             Personalize Email with A.I.
                           </>
                         )}
-                      </button>
+                      </button> */}
                     </div>
 
                     {/* Move textarea to the top */}

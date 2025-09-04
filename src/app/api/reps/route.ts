@@ -15,7 +15,7 @@ export async function GET() {
     console.log('Attempting to fetch from sheet...')
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.SHEET_ID,
-      range: 'House!A:L',
+      range: 'House!A:N',
     })
 
     console.log('Response received')
@@ -42,9 +42,13 @@ export async function GET() {
         signed117th: r[4]?.toLowerCase() === 'y',
         signed115th: r[5]?.toLowerCase() === 'y',
         legislativeContacts: r[6] || '',
-        legislativeDirector: r[7] || '',
-        officePhone: r[10] || '',
-        senatorsSignedSenateVersion: r[11] || '',
+        chiefOfStaff: r[7] || '',
+        headOfComms: r[8] || '',
+        legislativeDirector: r[9] || '',
+        cbc: r[10] || '',
+        hispanicCaucus: r[11] || '',
+        officePhone: r[12] || '',
+        senatorsSignedSenateVersion: r[13] || '',
       }
     })
 

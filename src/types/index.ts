@@ -6,7 +6,11 @@ export interface Rep {
   signed117th: boolean
   signed115th: boolean
   legislativeContacts: string
+  chiefOfStaff: string
+  headOfComms: string
   legislativeDirector: string
+  cbc: string
+  hispanicCaucus: string
   officePhone: string
   senatorsSignedSenateVersion: string
 }
