@@ -15,7 +15,7 @@ export async function GET() {
     console.log('Attempting to fetch from sheet...')
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.SHEET_ID,
-      range: 'House!A:N',
+      range: 'House',
     })
 
     console.log('Response received')

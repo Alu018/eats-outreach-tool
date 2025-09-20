@@ -156,12 +156,13 @@ const Home: React.FC = () => {
         .replace(/, ([^,]*)$/, ', and $1')
       signingSentence = `Rep. ${rep.name} has been a strong voice on this issue, having signed ${countWord} previous letter${signedLetters.length > 1 ? 's' : ''} in the ${letterList} Congress${signedLetters.length > 1 ? 'es' : ''}. The most recent one was signed by over 170 House Democrats.`
     } else {
-      signingSentence = 'In 2023, over 170 House Democrats signed a similar opposition letter.'
+      signingSentence = 'This letter currently has over 160 signatures from House Democrats, and is gaining more support daily.'
     }
 
     // Senator sentence
     let senatorSentence = ''
     const senatorValue = rep.senatorsSignedSenateVersion?.trim().toLowerCase()
+    console.log(rep)
     if (
       rep.senatorsSignedSenateVersion &&
       senatorValue !== 'none' &&
@@ -221,6 +222,7 @@ ${orgName || '[Your Name]'}
       }
 
       const getSenatorLastName = (senatorString: string) => {
+        console.log(`Extracting senator last name from: "${senatorString}"`)
         if (!senatorString) return ''
         const value = senatorString.trim().toLowerCase()
         if (value === 'none' || value === 'no' || value === 'na') return ''
